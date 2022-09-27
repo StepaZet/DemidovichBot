@@ -11,6 +11,7 @@ from datetime import datetime
 #db = DBHelper('weather_data')
 TOKEN = "5584161509:AAFwAx4FNR_hSJNArQulRQ1alba-CjjLszA"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
+simple_statistic = set()
 
 def send_message(text, chat_id, reply_markup=None):
     text = urllib.parse.quote_plus(text)
@@ -60,8 +61,8 @@ def build_keyboard(items):
 
 
 # def build_keyboard_get_weather():
-#     reply_markup = {"keyboard": [['Yandex.Погода🌤']], "one_time_keyboard": False}
-#     return json.dumps(reply_markup)
+#    reply_markup = {"keyboard": [['/stat']], "one_time_keyboard": False}
+#    return json.dumps(reply_markup)
 
 def is_file_exist(path: str) -> bool:
     return os.path.isfile(path)
@@ -71,14 +72,17 @@ def handle_updates(updates):
     for update in updates["result"]:
         print(f'Принят запрос в {datetime.now()}')
         if 'edited_message' in update:
+            simple_statistic.add(update['edited_message']['chat']['id'])
             send_message('Ты изменил какое-то сообщение -.-', update['edited_message']['chat']['id'])
             continue
 
         if 'message' not in update:
+            simple_statistic.add(update['my_chat_member']['chat']['id'])
             send_message('Такого функционала пока нет', update['my_chat_member']['chat']['id'])
             continue
 
         chat = update["message"]["chat"]["id"]
+        simple_statistic.add(chat)
         try:
             text = update["message"]["text"]
             #items = db.get_items(chat)
@@ -88,18 +92,21 @@ def handle_updates(updates):
                 send_message(
                     'Привет! Напиши номер задачки из Демидовича, '
                     'которую хочешь получить', chat)
+            elif text == '/stat':
+                send_message(
+                    f'C запуска бота его юзали {len(simple_statistic)} человек 😱', chat)
             else:
                 number_found = re.fullmatch(r'\d*\.?(\d*)?', text)
                 if number_found:
                     if is_file_exist(f'images/{number_found[0]}.gif'):
                         send_photo(f'images/{number_found[0]}.gif', chat,
-                                   f'Вот твой номер {number_found[0]}')
+                                   f'Вот твой номер {number_found[0]} 😘')
                     else:
-                        send_message(f'Номера {number_found[0]} нет в базе', chat)
+                        send_message(f'Номера {number_found[0]} нет в базе 🤥', chat)
                 else:
-                    send_message(f'"{text}" - Не номер', chat)
+                    send_message(f'"{text}" - Не номер 🥸', chat)
         except:
-            send_message(f'Ты что-то не то отправил', chat)
+            send_message(f'Ты что-то не то отправил 🫣', chat)
 
 
 def get_last_update_id(updates):
