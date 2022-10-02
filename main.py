@@ -74,39 +74,46 @@ def handle_updates(updates):
         if 'edited_message' in update:
             simple_statistic.add(update['edited_message']['chat']['id'])
             send_message('Ты изменил какое-то сообщение -.-', update['edited_message']['chat']['id'])
+            print(f'    * Измененное сообщение')
             continue
 
         if 'message' not in update:
             simple_statistic.add(update['my_chat_member']['chat']['id'])
             send_message('Такого функционала пока нет', update['my_chat_member']['chat']['id'])
+            print(f'    * Кто-то подписался или отписался')
             continue
 
         chat = update["message"]["chat"]["id"]
         simple_statistic.add(chat)
         try:
             text = update["message"]["text"]
-            #items = db.get_items(chat)
 
             if text == '/start':
-                #keyboard = build_keyboard_get_weather()
                 send_message(
                     'Привет! Напиши номер задачки из Демидовича, '
                     'которую хочешь получить', chat)
+                print('    * Отправил /start')
             elif text == '/stat':
                 send_message(
-                    f'C запуска бота его юзали {len(simple_statistic)} человек 😱', chat)
+                    f'Cегодня бота его юзали {len(simple_statistic)} человек 😱', chat)
+                print('    * Отправил статистику')
+
             else:
                 number_found = re.fullmatch(r'\d*\.?(\d*)?', text)
                 if number_found:
                     if is_file_exist(f'images/{number_found[0]}.gif'):
                         send_photo(f'images/{number_found[0]}.gif', chat,
                                    f'Вот твой номер {number_found[0]} 😘')
+                        print(f'    * Отправил номер {number_found[0]}')
                     else:
                         send_message(f'Номера {number_found[0]} нет в базе 🤥', chat)
+                        print(f'    * Не нашел номера {number_found[0]} в базе')
                 else:
                     send_message(f'"{text}" - Не номер 🥸', chat)
+                    print(f'    * Не номер {text}')
         except:
             send_message(f'Ты что-то не то отправил 🫣', chat)
+            print('    (#) Что-то пошло не так!')
 
 
 def get_last_update_id(updates):
@@ -159,6 +166,12 @@ def main():
             handle_updates(updates)
         time.sleep(0.5)
 
-
 if __name__ == '__main__':
-    main()
+    while (True):
+        try:
+            # 635201622 - id чата с StepaZet
+            send_message(f'Бот поднят', 635201622)
+            main()
+        except Exception as e:
+            send_message(f'Бот лег с ошибкой {str(e)}', 635201622)
+            time.sleep(120)
