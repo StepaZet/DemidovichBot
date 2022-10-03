@@ -4,6 +4,8 @@ import urllib.parse
 import requests
 import re
 import os
+import logging
+import sys
 import threading
 from datetime import datetime
 
@@ -12,6 +14,17 @@ from datetime import datetime
 TOKEN = "5584161509:AAFwAx4FNR_hSJNArQulRQ1alba-CjjLszA"
 URL = f"https://api.telegram.org/bot{TOKEN}/"
 simple_statistic = set()
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
 
 def send_message(text, chat_id, reply_markup=None):
     text = urllib.parse.quote_plus(text)
@@ -70,17 +83,17 @@ def is_file_exist(path: str) -> bool:
 
 def handle_updates(updates):
     for update in updates["result"]:
-        print(f'Принят запрос в {datetime.now()}')
+        logging.info("Запрос принят")
         if 'edited_message' in update:
             simple_statistic.add(update['edited_message']['chat']['id'])
             send_message('Ты изменил какое-то сообщение -.-', update['edited_message']['chat']['id'])
-            print(f'    * Измененное сообщение')
+            logging.info(f"Измененное сообщение")
             continue
 
         if 'message' not in update:
             simple_statistic.add(update['my_chat_member']['chat']['id'])
             send_message('Такого функционала пока нет', update['my_chat_member']['chat']['id'])
-            print(f'    * Кто-то подписался или отписался')
+            logging.info(f'Кто-то подписался или отписался')
             continue
 
         chat = update["message"]["chat"]["id"]
@@ -92,11 +105,11 @@ def handle_updates(updates):
                 send_message(
                     'Привет! Напиши номер задачки из Демидовича, '
                     'которую хочешь получить', chat)
-                print('    * Отправил /start')
+                logging.info("Отправил /start")
             elif text == '/stat':
                 send_message(
                     f'Cегодня бота его юзали {len(simple_statistic)} человек 😱', chat)
-                print('    * Отправил статистику')
+                logging.info("Отправил статистику")
 
             else:
                 number_found = re.fullmatch(r'\d*\.?(\d*)?', text)
@@ -104,16 +117,16 @@ def handle_updates(updates):
                     if is_file_exist(f'images/{number_found[0]}.gif'):
                         send_photo(f'images/{number_found[0]}.gif', chat,
                                    f'Вот твой номер {number_found[0]} 😘')
-                        print(f'    * Отправил номер {number_found[0]}')
+                        logging.info(f'Отправил номер {number_found[0]}')
                     else:
                         send_message(f'Номера {number_found[0]} нет в базе 🤥', chat)
-                        print(f'    * Не нашел номера {number_found[0]} в базе')
+                        logging.warning(f'Не нашел номера {number_found[0]} в базе')
                 else:
                     send_message(f'"{text}" - Не номер 🥸', chat)
-                    print(f'    * Не номер {text}')
-        except:
+                    logging.info(f'Не номер {text}')
+        except Exception as e:
             send_message(f'Ты что-то не то отправил 🫣', chat)
-            print('    (#) Что-то пошло не так!')
+            logging.error(f"Что-то пошло не так! {str(e)}")
 
 
 def get_last_update_id(updates):
@@ -128,7 +141,7 @@ def get_last_chat_id_and_text(updates):
     last_update = num_updates - 1
     text = updates["result"][last_update]["message"]["text"]
     chat_id = updates["result"][last_update]["message"]["chat"]["id"]
-    return (text, chat_id)
+    return text, chat_id
 
 
 def send_message(text, chat_id, reply_markup=None):
@@ -166,8 +179,9 @@ def main():
             handle_updates(updates)
         time.sleep(0.5)
 
+
 if __name__ == '__main__':
-    while (True):
+    while True:
         try:
             # 635201622 - id чата с StepaZet
             send_message(f'Бот поднят', 635201622)
