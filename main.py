@@ -144,24 +144,6 @@ def get_last_chat_id_and_text(updates):
     return text, chat_id
 
 
-def send_message(text, chat_id, reply_markup=None):
-    text = urllib.parse.quote_plus(text)
-    url = f"{URL}sendMessage?text={text}&chat_id={chat_id}"
-    if reply_markup:
-        url += f"&reply_markup={reply_markup}"
-    get_url(url)
-
-
-def send_photo(photo, chat_id, text=None, reply_markup=None, ):
-    url = f"{URL}sendPhoto?chat_id={chat_id}"
-    files = {'photo': open(photo, 'rb')}
-    if text:
-        text = urllib.parse.quote_plus(text)
-        url += f'&caption={text}'
-    if reply_markup:
-        url += f"&reply_markup={reply_markup}"
-    requests.post(url, files=files)
-
 
 def get_latest_request_id():
     updates = get_updates()["result"]
