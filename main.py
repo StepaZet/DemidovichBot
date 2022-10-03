@@ -60,9 +60,10 @@ def build_keyboard(items):
 '''
 
 
-# def build_keyboard_get_weather():
-#    reply_markup = {"keyboard": [['/stat']], "one_time_keyboard": False}
-#    return json.dumps(reply_markup)
+def build_keyboard_help():
+    reply_markup = {"keyboard": [['/help'],['❤']], "one_time_keyboard": False, "resize_keyboard": True}
+    return json.dumps(reply_markup)
+
 
 def is_file_exist(path: str) -> bool:
     return os.path.isfile(path)
@@ -70,6 +71,7 @@ def is_file_exist(path: str) -> bool:
 
 def handle_updates(updates):
     for update in updates["result"]:
+        keyboard_help = build_keyboard_help()
         print(f'Принят запрос в {datetime.now()}')
         if 'edited_message' in update:
             simple_statistic.add(update['edited_message']['chat']['id'])
@@ -89,15 +91,29 @@ def handle_updates(updates):
             text = update["message"]["text"]
 
             if text == '/start':
+
                 send_message(
                     'Привет! Напиши номер задачки из Демидовича, '
-                    'которую хочешь получить', chat)
+                    'которую хочешь получить', chat, keyboard_help)
+                print('    * Отправил /start')
+            elif text == '/help':
+                send_message(
+                    'Привет! Бот может отправить тебе номер из демидовича \n'
+                    'Пиши ему номер задания по типу:\n123 или 123.4 \n\n'
+                    'Пока отправляем только картинку условия (ответов и решений нет, увы) \n'
+                    'Если номер не найден, но ты знаешь, что он точно есть, '
+                    'попробуй отправить соседние номера \n(или, если это номер с точкой как 123.4, '
+                    'попробуй отправить только целую часть (123))\n\n'
+                    'Если будут любые проблемы, пиши авторам: @therealnowhereman, @Demotivator_Stepan, @not_amigo\n'
+                    'Удачи!) 🥰', chat)
                 print('    * Отправил /start')
             elif text == '/stat':
                 send_message(
                     f'Cегодня бота его юзали {len(simple_statistic)} человек 😱', chat)
                 print('    * Отправил статистику')
-
+            elif text == '❤':
+                send_message(f'❤', chat)
+                print('    * Отправил ❤')
             else:
                 number_found = re.fullmatch(r'\d*\.?(\d*)?', text)
                 if number_found:
@@ -109,10 +125,10 @@ def handle_updates(updates):
                         send_message(f'Номера {number_found[0]} нет в базе 🤥', chat)
                         print(f'    * Не нашел номера {number_found[0]} в базе')
                 else:
-                    send_message(f'"{text}" - Не номер 🥸', chat)
+                    send_message(f'"{text}" - Не номер 🥸', chat, keyboard_help)
                     print(f'    * Не номер {text}')
         except:
-            send_message(f'Ты что-то не то отправил 🫣', chat)
+            send_message(f'Ты что-то не то отправил 🫣', chat, keyboard_help)
             print('    (#) Что-то пошло не так!')
 
 
@@ -165,6 +181,7 @@ def main():
             last_update_id = get_last_update_id(updates) + 1
             handle_updates(updates)
         time.sleep(0.5)
+
 
 if __name__ == '__main__':
     while (True):
