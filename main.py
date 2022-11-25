@@ -6,11 +6,13 @@ import logging
 import sys
 import asyncio
 
+
 def build_keyboard_help():
     reply_markup = {"keyboard": [['/help'],['❤️']], "one_time_keyboard": False, "resize_keyboard": True}
     return json.dumps(reply_markup)
 
 simple_statistic = set()
+hearts_count = 0
 keyboard_help = build_keyboard_help()
 
 logging.basicConfig(
@@ -24,12 +26,17 @@ logging.basicConfig(
 
 
 async def process_update(update: dict) -> None:
+    global hearts_count
     logs = []
 
-    for key in update:
-        if type(update[key]) is dict and 'chat' in update[key]:
-            logs.append(f"Запрос принят от {update[key]['chat']['username']}")
-            break
+    try:
+        for key in update:
+            if type(update[key]) is dict and 'chat' in update[key]:
+                logs.append(f"Запрос принят от {update[key]['chat']['username']}")
+                break
+    except Exception as e:
+        print(e)
+        raise e
 
     if 'edited_message' in update:
         simple_statistic.add(update['edited_message']['chat']['id'])
@@ -63,23 +70,26 @@ async def process_update(update: dict) -> None:
             await tg.async_send_message(
                 'Привет! Бот может отправить тебе номер из демидовича \n'
                 'Пиши ему номер задания по типу:\n652 или 652.1 \n\n'
-                'Пока отправляем только картинку условия (ответов и решений нет, увы) \n'
-                'Если номер не найден, но ты знаешь, что он точно есть, '
-                'попробуй отправить соседние номера \n(или, если это номер с точкой как 123.4, '
-                'попробуй отправить только целую часть (123))\n\n'
+                'Пока отправляем только картинку условия (ответов и решений нет, увы) \n\n'
+                'Если номер с точкой не найден, но ты знаешь, что он точно есть (например 652.1), '
+                'попробуй отправить только целую часть (652)\n\n'
+                'Если бот не ответил на номер ничего: некоторые картинки с номерами битые (пока не исправили),'
+                ' отправь соседние номера, возможно, на их картинках будет твой номер\n\n'
                 'Если будут любые проблемы, пиши авторам: @therealnowhereman, @Demotivator_Stepan, @not_amigo\n'
                 'Удачи!) 🥰', chat)
             for log in logs:
                 logging.info(log)
             logging.info('    * Отправил /help')
         elif text == '❤️':
+            hearts_count += 1
             await tg.async_send_message(f'❤️', chat)
             for log in logs:
                 logging.info(log)
             logging.info('    * Отправил сердечко')
         elif text == '/stat':
             await tg.async_send_message(
-                f'Cегодня бота юзали {len(simple_statistic)} человек 😱', chat)
+                f'Cегодня бота юзали {len(simple_statistic)} человек 😱\n'
+                f'Я получил {hearts_count} сердечек 🥰❤️', chat)
             for log in logs:
                 logging.info(log)
             logging.info("    * Отправил статистику")
@@ -108,7 +118,7 @@ async def process_update(update: dict) -> None:
 
             else:
                 await tg.async_send_message(f'"{text}" - Не могу распознать номер 🥸\n'
-                                   f'Номера имею вид:\n'
+                                   f'Номера имеют вид:\n'
                                    f'652 и 652.1', chat, keyboard_help)
                 for log in logs:
                     logging.info(log)
@@ -130,7 +140,7 @@ async def start():
     last_update_id = tg.get_latest_request_id()
     while True:
         updates = tg.get_updates(last_update_id)
-        if len(updates["result"]) > 0:
+        if 'result' in updates and len(updates["result"]) > 0:
             last_update_id = tg.get_last_update_id(updates) + 1
             await handle_updates(updates)
         time.sleep(0.5)
