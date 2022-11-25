@@ -49,6 +49,14 @@ def get_updates(offset=None):
     return js
 
 
+async def async_get_updates(offset=None):
+    url = URL + "getUpdates?timeout=100"
+    if offset:
+        url += f"&offset={offset}"
+    js = await async_get_json_from_url(url)
+    return js
+
+
 async def async_send_message(text, chat_id, reply_markup=None):
     text = urllib.parse.quote_plus(text)
     url = f"{URL}sendMessage?text={text}&chat_id={chat_id}"
@@ -85,8 +93,11 @@ def get_last_chat_id_and_text(updates):
 
 def get_latest_request_id():
     updates = get_updates()["result"]
-    url = URL + "getUpdates?timeout=100"
-    return updates[-1]["update_id"] + 1
+    #url = URL + "getUpdates?timeout=100"
+    if len(updates) > 0:
+        return updates[-1]["update_id"] + 1
+    else:
+        return 0
 
 
 # def send_message(text, chat_id, reply_markup=None):
