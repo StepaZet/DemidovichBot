@@ -11,3 +11,4 @@ class TaskType(Enum):
 class Task:
     task_type: TaskType
     data: str
+    text: str | None = None
