@@ -1,8 +1,14 @@
-debug.log
-/debug.log
+# Cahce and user-dependent directories
 .idea/**
 /.idea/**
 __pycache__/**
 /__pycache__/**
 venv/**
 /venv/**
+
+# Database
+*.db
+
+# Logs
+debug.log
+/debug.log
