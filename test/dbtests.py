@@ -6,6 +6,7 @@ class TestDB(unittest.TestCase):
     def setUp(self):
         self.test_db = pickledb.load('test.db', False)
         self.test_db.dcreate('test_dict')
+        self.test_db.dump()
 
     def test_get_non_existent_dict(self):
         with self.assertRaises(KeyError):
