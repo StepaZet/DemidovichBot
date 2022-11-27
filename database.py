@@ -27,6 +27,8 @@ class Database:
         return self.__db.dgetall(self.__table_name)
 
     def set(self, identifier: str, value):
+        if self.__db.dexists(self.__table_name, identifier):
+            self.__db.drem(self.__table_name, identifier)
         self.__db.dadd(self.__table_name, (identifier, value))
         self.__db.dump()
 
