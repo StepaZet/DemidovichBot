@@ -20,10 +20,10 @@ class Provider:
         }
         self.db = Database("Users")
 
-    def set_user_mode(self, user_id: int, mode: SubjectType):
+    def set_user_mode(self, user_id: str, mode: SubjectType):
         self.db.set(user_id, mode)
 
-    def get_tasks(self, user_id: int, query: str) -> list[Task]:
+    def get_tasks(self, user_id: str, query: str) -> list[Task]:
         try:
             mode = self.db.get_by_key(user_id)
         except Exception as e:
@@ -33,4 +33,3 @@ class Provider:
 
     def get_statistic(self, stat_type: StatType) -> str:
         raise NotImplementedError()
-
