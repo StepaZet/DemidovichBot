@@ -1,17 +1,10 @@
-# Telegram...
-# Provider
-# StatProvider
-# TaskProvider
-# Task:
-#   Demidovich
-#   Terver
-# Database
-
 import telebot
+
 from telebot import types
 from provider import Provider
 from subject_type import SubjectType
 from task import TaskType, Task
+from provider import ProviderError
 
 TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
@@ -56,9 +49,9 @@ def stat_message(message):
 
 def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
     try:
-        return provider.get_tasks(chat_id, message)
-    except Exception as e:
-        return 'Какая-то ошибка'
+        return provider.get_tasks(str(chat_id), message)
+    except ProviderError as e:
+        return 'Ты не выбрал режим'
 
 
 @bot.message_handler(content_types=['text'])
