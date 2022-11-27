@@ -26,7 +26,7 @@ class Provider:
     def get_tasks(self, user_id: str, query: str) -> list[Task]:
         try:
             mode = self.db.get_by_key(user_id)
-        except Exception as e:
+        except KeyError as e:
             raise ProviderError("User has not a mode to get task") from e
 
         return self.subjects[SubjectType(mode)].get_tasks(query)
