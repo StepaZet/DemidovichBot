@@ -20,6 +20,7 @@ def _get_task_numbers_from_query(query: str) -> list[str]:
         for match in range_match:
             start, end = match.split("-")[0], match.split("-")[1]
             numbers.extend(map(str, range(int(start), int(end) + 1)))
+        return numbers[:10]
 
     numbers_match = re.findall(numbers_pattern, query)
     if numbers_match is not None:
@@ -33,7 +34,7 @@ class DemidovichProvider(TaskProvider):
         self.db = Database(SubjectType.DEMIDOVICH.value)
 
     def get_tasks(self, query: str) -> list[Task]:
-        numbers = _get_task_numbers_from_query(query)
+        numbers = sorted(list(set(_get_task_numbers_from_query(query))))
         problems = [self.db.get_by_key(number) for number in numbers]
         tasks = [Task(TaskType.PHOTO, p) for p in problems]
 
