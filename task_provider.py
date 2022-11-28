@@ -21,7 +21,7 @@ class TaskProvider:
     def _get_task_by_number(self, number: str) -> Task:
         return self._create_task_by_number(
             number, self._create_task, self._create_unknown_task,
-            f'Держи своё задание {number} 😘')
+            f'Вот твое задание {number} 😘')
 
     def _create_task_by_number(self, number: str, task_creator,
                                create_unknown_task, message: str = "") -> Task:
