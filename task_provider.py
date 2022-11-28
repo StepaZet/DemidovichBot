@@ -16,14 +16,14 @@ def _get_task_numbers_from_query(query: str) -> list[str]:
     numbers = []
 
     range_match = re.findall(range_pattern, query)
-    if range_match is not None:
+    if len(range_match) > 0:
         for match in range_match:
-            start, end = match.split("-")[0], match.split("-")[1]
-            numbers.extend(map(str, range(int(start), int(end) + 1)))
+            start, end = int(match[0]), int(match[1])
+            numbers.extend(map(str, range(start, end + 1)))
         return numbers[:10]
 
     numbers_match = re.findall(numbers_pattern, query)
-    if numbers_match is not None:
+    if len(numbers_match) > 0:
         numbers.extend([m[0] + m[1] for m in numbers_match])
 
     return numbers[:10]
@@ -31,23 +31,31 @@ def _get_task_numbers_from_query(query: str) -> list[str]:
 
 class DemidovichProvider(TaskProvider):
     def __init__(self):
-        self.db = Database(SubjectType.DEMIDOVICH.value)
+        self.__db = Database(SubjectType.DEMIDOVICH.value)
 
     def get_tasks(self, query: str) -> list[Task]:
         numbers = sorted(list(set(_get_task_numbers_from_query(query))))
-        problems = [self.db.get_by_key(number) for number in numbers]
-        tasks = [Task(TaskType.PHOTO, p) for p in problems]
+        tasks = [self.__get_task_by_number(number) for number in numbers]
 
         if len(tasks) == 10:
             tasks[-1].text = "Больше 10 заданий не дам"
 
         return tasks
 
+    def __get_task_by_number(self, number: str, message: str = "") -> Task:
+        try:
+            return Task(TaskType.PHOTO, self.__db.get_by_key(number), message)
+        except KeyError:
+            if "." in number:
+                return self.__get_task_by_number(number.split(".")[0], f"Задачу {number} не нашел, "
+                                                                       f"но нашел {number.split('.')[0]}")
+            return Task(TaskType.TEXT, "Задача не найдена")
+
 
 class ProbabilitiesProvider(TaskProvider):
     def __init__(self):
-        self.db = Database(SubjectType.PROBABILITIES.value)
+        self.__db = Database(SubjectType.PROBABILITIES.value)
 
     def get_tasks(self, query: str) -> list[Task]:
-        link = self.db.get_by_key(query)
+        link = self.__db.get_by_key(query)
         return [Task(TaskType.TEXT, link)]
