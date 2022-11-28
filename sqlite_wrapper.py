@@ -61,4 +61,3 @@ class SQLiteDB:
     def clear_db(self) -> None:
         self.__cursor.execute(f'DELETE FROM stats;')
         self.__sqlite_connection.commit()
-

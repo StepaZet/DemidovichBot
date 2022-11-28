@@ -3,10 +3,11 @@ from database import Database
 from stat_type import StatType
 from task import Task
 from event import Event
-from sqlite_wrapper import SQLiteDB
-from task_provider import TaskProvider, \
-    DemidovichProvider,\
+from task_provider import (
+    TaskProvider,
+    DemidovichProvider,
     ProbabilitiesProvider
+)
 
 
 class ProviderError(Exception):

@@ -1,5 +1,3 @@
-import copy
-
 import telebot
 
 from telebot import types

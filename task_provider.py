@@ -81,5 +81,3 @@ def _get_task_numbers_from_query(query: str) -> list[str]:
         numbers.extend([m[0] + m[1] for m in numbers_match])
 
     return numbers[:10]
-
-

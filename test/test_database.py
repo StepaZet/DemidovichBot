@@ -19,4 +19,3 @@ class TestDB(unittest.TestCase):
     def test_get_existed_db(self):
         test_dict = pickledb.load('test_dict', False)
         self.assertIsNotNone(test_dict)
-
