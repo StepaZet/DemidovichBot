@@ -2,6 +2,11 @@ import sqlite3
 from database import Database
 
 
+def add_task(user_id: str, query: str, res: str) -> None:
+    sqlite_db = SQLiteDB()
+    sqlite_db.add_note_to_db(user_id, query, res)
+
+
 class SQLiteDB:
     def __init__(self):
         self.__sqlite_connection = sqlite3.connect('sqlite.db')
@@ -53,4 +58,7 @@ class SQLiteDB:
         self.__cursor.execute(f'SELECT date FROM stats GROUP BY date ORDER BY COUNT(*) DESC LIMIT 1;')
         return self.__cursor.fetchone()[0]
 
+    def clear_db(self) -> None:
+        self.__cursor.execute(f'DELETE FROM stats;')
+        self.__sqlite_connection.commit()
 

@@ -8,10 +8,12 @@ from subject_type import SubjectType
 from task import TaskType, Task
 from provider import ProviderError
 from file_manager import FileManager
+from sqlite_wrapper import add_task
 
 TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 provider: Provider = Provider()
+provider.event += add_task
 
 
 def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
