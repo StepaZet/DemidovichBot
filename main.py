@@ -124,8 +124,10 @@ def message_handler(message: types.Message):
                          reply_markup=_build_start_keyboard())
         return
 
-    responses_photo = [task for task in tasks if task.task_type == TaskType.PHOTO]
-    responses_text = [task for task in tasks if task.task_type == TaskType.TEXT]
+    responses_photo = [task for task in tasks
+                       if task.task_type == TaskType.PHOTO]
+    responses_text = [task for task in tasks
+                      if task.task_type == TaskType.TEXT]
     if responses_photo:
         handle_photo_responses(message, responses_photo)
     if responses_text:
