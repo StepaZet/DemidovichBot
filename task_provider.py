@@ -57,5 +57,8 @@ class ProbabilitiesProvider(TaskProvider):
         self.__db = Database(SubjectType.PROBABILITIES.value)
 
     def get_tasks(self, query: str) -> list[Task]:
-        link = self.__db.get_by_key(query)
+        try:
+            link = self.__db.get_by_key(query)
+        except KeyError:
+            return [Task(TaskType.TEXT, "Такой практики нет(")]
         return [Task(TaskType.TEXT, link)]
