@@ -2,9 +2,9 @@ import sqlite3
 from database import Database
 
 
-def add_task(user_id: str, query: str, res: str) -> None:
+def add_task(user_id: str, query: str, res: str, mode: str) -> None:
     sqlite_db = SQLiteDB()
-    sqlite_db.add_note_to_db(user_id, query, res)
+    sqlite_db.add_note_to_db(user_id, query, res, mode)
 
 
 class SQLiteDB:
@@ -13,12 +13,7 @@ class SQLiteDB:
         self.__cursor = self.__sqlite_connection.cursor()
         self.__cursor.execute('CREATE TABLE IF NOT EXISTS stats (user_id TEXT, date datetime, mode TEXT, query TEXT, answer TEXT);')
 
-    def add_note_to_db(self, user_id: str, query: str, answer: str) -> None:
-        db = Database("Users")
-        try:
-            mode = db.get_by_key(user_id)
-        except KeyError:
-            mode = None
+    def add_note_to_db(self, user_id: str, query: str, answer: str, mode: str) -> None:
         self.__cursor.execute(f'INSERT INTO stats VALUES (?,datetime("now"),?,?,?);', (user_id, mode, query, answer))
         self.__sqlite_connection.commit()
 

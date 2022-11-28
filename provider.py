@@ -33,7 +33,8 @@ class Provider:
         except KeyError as e:
             raise ProviderError("User has not a mode to get task") from e
         res = self.subjects[SubjectType(mode)].get_tasks(query)
-        self.event(user_id, query, str(res))
+        res_data = [task.data for task in res]
+        self.event(user_id, query, str(res_data), mode)
         return res
 
     def get_statistic(self, stat_type: StatType) -> str:
