@@ -38,7 +38,7 @@ def test_probabilities_provider():
     assert task == [Task(TaskType.TEXT, 'ref')]
 
     task = provider.get_tasks('02')
-    assert task == [Task(TaskType.TEXT, 'Такой практики нет')]
+    assert task == [Task(TaskType.TEXT, 'Такой практики нет(')]
 
 
 if __name__ == '__main__':
