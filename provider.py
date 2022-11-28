@@ -21,7 +21,7 @@ class Provider:
         self.db = Database("Users")
 
     def set_user_mode(self, user_id: str, mode: SubjectType):
-        self.db.set(user_id, mode)
+        self.db.set(user_id, mode.value)
 
     def get_tasks(self, user_id: str, query: str) -> list[Task]:
         try:

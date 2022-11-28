@@ -74,14 +74,15 @@ def message_handler(message):
     else:
         tasks = try_get_tasks(message.chat.id, message.text)
         if isinstance(tasks, str):
-            bot.send_message(message.chat.id, tasks)
+            bot.send_message(message.chat.id, tasks, reply_markup=build_start_keyboard())
             return
 
         for task in tasks:
             if task.task_type == TaskType.TEXT:
                 bot.send_message(message.chat.id, task.text)
             elif task.task_type == TaskType.PHOTO:
-                bot.send_photo(message.chat.id, task.data, caption=task.text)
+                with open(task.data, 'rb') as photo:
+                    bot.send_photo(message.chat.id, photo, caption=task.text)
 
 
 if __name__ == '__main__':
