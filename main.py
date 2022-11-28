@@ -11,7 +11,7 @@ bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 provider: Provider = Provider()
 
 
-def build_start_keyboard() -> types.ReplyKeyboardMarkup:
+def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(types.KeyboardButton('Демидович'))
     keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
@@ -19,7 +19,7 @@ def build_start_keyboard() -> types.ReplyKeyboardMarkup:
     return keyboard
 
 
-def build_book_keyboard() -> types.ReplyKeyboardMarkup:
+def _build_book_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(types.KeyboardButton('Демидович'))
     keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
@@ -31,7 +31,7 @@ def build_book_keyboard() -> types.ReplyKeyboardMarkup:
 @bot.message_handler(commands=['start'])
 def start_message(message):
     start_text = ...
-    keyboard = build_start_keyboard()
+    keyboard = _build_start_keyboard()
     bot.send_message(message.chat.id, start_text, reply_markup=keyboard)
 
 
@@ -54,35 +54,49 @@ def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
         return 'Ты не выбрал режим'
 
 
-@bot.message_handler(content_types=['text'])
-def message_handler(message):
+def try_handle_button_request(message: types.Message) -> bool:
     button_requests = {
-        'Демидович': ('Выбран Демидович\n'
-                      'Напиши номер(а) задачи(задачек, через пробел)',
-                      SubjectType.DEMIDOVICH),
-        'Тервер (ФИИТ)': ('Выбран Тервер (ФИИТ)\n'
-                          'Напиши номер(а) задачи(задачек, через пробел)',
-                          SubjectType.PROBABILITIES),
-        '❤️': ('Спасибо за лайк!', None),
+        'Демидович':
+            ('Выбран Демидович\n'
+             'Напиши номер(а) задачи(задачек, через пробел)',
+             lambda: provider.set_user_mode(str(message.chat.id),
+                                            SubjectType.DEMIDOVICH)),
+        'Тервер (ФИИТ)':
+            ('Выбран Тервер (ФИИТ)\n'
+             'Напиши номер(а) задачи(задачек, через пробел)',
+             lambda: provider.set_user_mode(str(message.chat.id),
+                                            SubjectType.PROBABILITIES)),
+        '❤️':
+            ('Спасибо за лайк!',
+             lambda: None),
     }
 
     if message.text in button_requests:
-        text, subject_type = button_requests[message.text]
-        bot.send_message(message.chat.id, text)
-        if subject_type:
-            provider.set_user_mode(message.chat.id, subject_type)
-    else:
-        tasks = try_get_tasks(message.chat.id, message.text)
-        if isinstance(tasks, str):
-            bot.send_message(message.chat.id, tasks, reply_markup=build_start_keyboard())
-            return
+        text, _function = button_requests[message.text]
+        bot.send_message(message.chat.id, text,
+                         reply_markup=_build_book_keyboard())
+        _function()
+        return True
+    return False
 
-        for task in tasks:
-            if task.task_type == TaskType.TEXT:
-                bot.send_message(message.chat.id, task.text)
-            elif task.task_type == TaskType.PHOTO:
-                with open(task.data, 'rb') as photo:
-                    bot.send_photo(message.chat.id, photo, caption=task.text)
+
+@bot.message_handler(content_types=['text'])
+def message_handler(message: types.Message):
+    if try_handle_button_request(message):
+        return
+
+    tasks = try_get_tasks(message.chat.id, message.text)
+    if isinstance(tasks, str):
+        bot.send_message(message.chat.id, tasks,
+                         reply_markup=_build_start_keyboard())
+        return
+
+    for task in tasks:
+        if task.task_type == TaskType.TEXT:
+            bot.send_message(message.chat.id, task.data)
+        elif task.task_type == TaskType.PHOTO:
+            with open(task.data, 'rb') as photo:
+                bot.send_photo(message.chat.id, photo, caption=task.text)
 
 
 if __name__ == '__main__':
