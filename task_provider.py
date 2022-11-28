@@ -19,9 +19,12 @@ class TaskProvider:
         return tasks
 
     def _get_task_by_number(self, number: str) -> Task:
-        return self._create_task_by_number(number, self._create_task, self._create_unknown_task)
+        return self._create_task_by_number(
+            number, self._create_task, self._create_unknown_task,
+            f'Держи своё задание {number} 😘')
 
-    def _create_task_by_number(self, number: str, task_creator, create_unknown_task, message: str = "") -> Task:
+    def _create_task_by_number(self, number: str, task_creator,
+                               create_unknown_task, message: str = "") -> Task:
         try:
             return task_creator(self.__db.get_by_key(number), message)
         except KeyError:
@@ -31,7 +34,8 @@ class TaskProvider:
         raise NotImplementedError("Unable to create task in abstract class")
 
     def _create_unknown_task(self, number: str) -> Task:
-        raise NotImplementedError("Unable to create unknown task in abstract class")
+        raise NotImplementedError(
+            "Unable to create unknown task in abstract class")
 
 
 class DemidovichProvider(TaskProvider):
@@ -47,10 +51,11 @@ class DemidovichProvider(TaskProvider):
                 number.split(".")[0],
                 self._create_task,
                 self._create_unknown_task,
-                f"Задачу {number} не нашел, но нашел {number.split('.')[0]}"
+                f"Задачу {number} не нашел, но, возможно, она есть на "
+                f"картинке с номером {number.split('.')[0]}🙄"
             )
 
-        return Task(TaskType.TEXT, "Задача не найдена")
+        return Task(TaskType.TEXT, "Задача не найдена 🤥")
 
 
 class ProbabilitiesProvider(TaskProvider):
@@ -61,7 +66,7 @@ class ProbabilitiesProvider(TaskProvider):
         return Task(TaskType.TEXT, task_text, message)
 
     def _create_unknown_task(self, number):
-        return Task(TaskType.TEXT, "Такой практики нет(")
+        return Task(TaskType.TEXT, "Такой практики нет 🤥")
 
 
 def _get_task_numbers_from_query(query: str) -> list[str]:
