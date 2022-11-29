@@ -13,10 +13,9 @@ class TestSQLite(unittest.TestCase):
 
     def test_create_table(self):
         table_name = 'test_table'
-        self.__cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
-        self.__cursor.execute(f'CREATE TABLE {table_name} (id INTEGER PRIMARY KEY, value TEXT)')
+        self.__cursor.execute(f'CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, value TEXT)')
         self.__cursor.execute(f'SELECT * FROM {table_name}')
-        self.assertEqual(self.__cursor.fetchall(), [])
+        self.assertIsNotNone(self.__cursor.fetchall())
 
     def test_add_value(self):
         table_name = 'test_table'

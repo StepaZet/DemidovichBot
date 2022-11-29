@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date, timedelta
 from database import Database
 
 
@@ -18,8 +19,9 @@ class SQLiteDB:
         self.__sqlite_connection.commit()
 
     def get_queries_amount_by_user_and_date(self, user_id: int, days_count: int) -> int:
+        start_date = date.today() + timedelta(days=1)
         self.__cursor.execute(f'SELECT COUNT(*) FROM stats WHERE user_id = "{user_id}" '
-                       f'AND date >= datetime("now", "-{days_count} days") AND date <= datetime("now");')
+                       f'AND date >= datetime(start_date, "-{days_count} days") AND date <= datetime("now");')
         return self.__cursor.fetchone()[0]
 
     def get_unique_users_by_days(self, days_count: int = 1) -> int:
@@ -56,3 +58,4 @@ class SQLiteDB:
     def clear_db(self) -> None:
         self.__cursor.execute(f'DELETE FROM stats;')
         self.__sqlite_connection.commit()
+

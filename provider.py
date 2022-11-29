@@ -3,6 +3,7 @@ from database import Database
 from stat_type import StatType
 from task import Task
 from event import Event
+from stat_handler import Statistics
 from task_provider import (
     TaskProvider,
     DemidovichProvider,
@@ -37,5 +38,10 @@ class Provider:
         self.event(user_id, query, str(res_data), mode)
         return res
 
-    def get_statistic(self, stat_type: StatType) -> str:
-        raise NotImplementedError()
+    @staticmethod
+    def get_statistic() -> str:
+        res = Statistics()\
+                    .get_unique_users_today()\
+                    .get_unique_users_week()\
+                    .get_unique_users_anytime()
+        return str(res)
