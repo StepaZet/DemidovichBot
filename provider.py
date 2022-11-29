@@ -42,6 +42,6 @@ class Provider:
     def get_statistic() -> str:
         res = Statistics()\
                     .get_unique_users_today()\
-                    .get_unique_users_week()\
+                    .get_unique_users_last_week()\
                     .get_unique_users_anytime()
         return str(res)

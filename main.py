@@ -46,7 +46,7 @@ def help_message(message):
 
 @bot.message_handler(commands=['Статистика'])
 def stat_message(message):
-    stat_text = ...
+    stat_text = Provider.get_statistic()
     bot.send_message(message.chat.id, stat_text)
 
 
