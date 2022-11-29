@@ -33,14 +33,19 @@ def _build_book_keyboard() -> types.ReplyKeyboardMarkup:
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    start_text = ...
+    start_text = 'Привет! Выбери нужный тебе задачник:'
     keyboard = _build_start_keyboard()
     bot.send_message(message.chat.id, start_text, reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['Помощь'])
 def help_message(message):
-    help_text = ...
+    help_text = 'Для начала работы выбери нужный тебе задачник.\n' \
+                'После этого напиши номер задачи, которую хочешь найти. Например, 10.1 или 42\n\n' \
+                'Если хочешь найти несколько задач, то напиши их через пробел, запятую или дефис.\n' \
+                'Например: 1, 2, 3 или 1-3 или 1 2 3\n\n' \
+                'Если будут любые проблемы, пиши авторам: ' \
+                '@therealnowhereman, @Demotivator_Stepan, @not_amigo Удачи!) 🥰'
     bot.send_message(message.chat.id, help_text)
 
 
