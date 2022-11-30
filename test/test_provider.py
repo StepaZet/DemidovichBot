@@ -19,18 +19,26 @@ class MockDataBase:
             raise KeyError
 
 
+def assert_single_task_equals(tasks: list[Task],
+                              data: str,
+                              task_type: TaskType):
+    assert len(tasks) == 1
+    assert tasks[0].data == data
+    assert tasks[0].task_type == task_type
+
+
 @patch('task_provider.Database', MockDataBase)
 @patch('provider.Database', MockDataBase)
 def test_get_tasks():
     provider = Provider()
     task = provider.get_tasks('user', '1')
-    assert task == [Task(TaskType.PHOTO, '1.jpg', '')]
+    assert_single_task_equals(task, "1.jpg", TaskType.PHOTO)
 
     task = provider.get_tasks('user', '2')
-    assert task == [Task(TaskType.TEXT, 'Задача не найдена')]
+    assert_single_task_equals(task, "Задача не найдена 🤥", TaskType.TEXT)
 
     task = provider.get_tasks('user', '1.1')
-    assert task == [Task(TaskType.PHOTO, '1.jpg', 'Задачу 1.1 не нашел, но нашел 1')]
+    assert_single_task_equals(task, "1.jpg", TaskType.PHOTO)
 
 
 @patch('task_provider.Database', MockDataBase)

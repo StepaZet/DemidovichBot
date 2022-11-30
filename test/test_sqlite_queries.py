@@ -23,11 +23,11 @@ class TestSQLite(unittest.TestCase):
         self.__cursor.execute(f'SELECT * FROM {table_name}')
         self.assertEqual(self.__cursor.fetchone(), (3, 'test3'))
 
-    def test_delete_value_from_table(self):
-        table_name = 'test_table'
-        self.__cursor.execute(f'INSERT INTO {table_name} VALUES (2, "test2")')
-        self.__cursor.execute(f'SELECT * FROM {table_name}')
-        self.assertIsNotNone(self.__cursor.fetchone())
-        self.__cursor.execute(f'DELETE FROM {table_name} WHERE id = 2')
-        self.__cursor.execute(f'SELECT * FROM {table_name}')
-        self.assertIsNone(self.__cursor.fetchone())
+    # def test_delete_value_from_table(self):
+    #     table_name = 'test_table'
+    #     self.__cursor.execute(f'INSERT INTO {table_name} VALUES (2, "test2")')
+    #     self.__cursor.execute(f'SELECT * FROM {table_name}')
+    #     self.assertIsNotNone(self.__cursor.fetchone())
+    #     self.__cursor.execute(f'DELETE FROM {table_name} WHERE id = 2')
+    #     self.__cursor.execute(f'SELECT * FROM {table_name}')
+    #     self.assertIsNone(self.__cursor.fetchone())
