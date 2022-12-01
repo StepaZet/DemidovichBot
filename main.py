@@ -138,6 +138,7 @@ def message_handler(message: types.Message):
     if responses_text:
         handle_text_responses(message, responses_text)
 
+#я съел деда
 
 if __name__ == '__main__':
     bot.polling()
