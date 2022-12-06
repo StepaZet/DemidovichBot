@@ -1,3 +1,6 @@
+import datetime
+import time
+
 import telebot
 
 from telebot import types
@@ -8,7 +11,7 @@ from provider import ProviderError
 from file_manager import FileManager
 from sqlite_wrapper import add_task
 
-TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
+TOKEN = '5584161509:AAFwAx4FNR_hSJNArQulRQ1alba-CjjLszA'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 provider: Provider = Provider()
 provider.event += add_task
@@ -18,7 +21,7 @@ def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(types.KeyboardButton('Демидович'))
     keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
-    keyboard.add(types.KeyboardButton('/Помощь'))
+    keyboard.add(types.KeyboardButton('/help'))
     return keyboard
 
 
@@ -27,7 +30,7 @@ def _build_book_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard.add(types.KeyboardButton('Демидович'))
     keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
     keyboard.add(types.KeyboardButton('❤️'))
-    keyboard.add(types.KeyboardButton('/Помощь'))
+    keyboard.add(types.KeyboardButton('/help'))
     return keyboard
 
 
@@ -38,7 +41,7 @@ def start_message(message):
     bot.send_message(message.chat.id, start_text, reply_markup=keyboard)
 
 
-@bot.message_handler(commands=['Помощь'])
+@bot.message_handler(commands=['help'])
 def help_message(message):
     help_text = 'Для начала работы выбери нужный тебе задачник.\n' \
                 'После этого напиши номер задачи, которую хочешь найти. Например, 10.1 или 42\n\n' \
@@ -49,7 +52,7 @@ def help_message(message):
     bot.send_message(message.chat.id, help_text)
 
 
-@bot.message_handler(commands=['Статистика'])
+@bot.message_handler(commands=['stats'])
 def stat_message(message):
     stat_text = Provider.get_statistic()
     bot.send_message(message.chat.id, stat_text)
@@ -89,9 +92,15 @@ def try_handle_button_request(message: types.Message) -> bool:
 
 
 def handle_photo_responses(message: types.Message, tasks: list[Task]):
+    if len(tasks) >= 1:
+        print(tasks[0].text)
+
     if len(tasks) == 1:
         with open(tasks[0].data, 'rb') as photo:
-            bot.send_photo(message.chat.id, photo, caption=tasks[0].text)
+            try:
+                bot.send_photo(message.chat.id, photo, caption=tasks[0].text)
+            except Exception as e:
+                bot.send_message(message.chat.id, 'Файл в базе поврежден')
     elif len(tasks) > 1:
         file_names = [task.data for task in tasks]
         capture = 'Держи найденные номера'
@@ -103,10 +112,16 @@ def handle_photo_responses(message: types.Message, tasks: list[Task]):
             for i, file in enumerate(files):
                 medias.append(types.InputMediaPhoto(file))
             medias[0].caption = capture
-            bot.send_media_group(message.chat.id, medias)
+            try:
+                bot.send_media_group(message.chat.id, medias)
+            except Exception as e:
+                bot.send_message(message.chat.id, 'Один из файлов в базе поврежден')
 
 
 def handle_text_responses(message: types.Message, tasks: list[Task]):
+    if len(tasks) >= 1:
+        print(tasks[0].text)
+
     if len(tasks) == 1:
         bot.send_message(message.chat.id, tasks[0].data)
     elif len(tasks) > 1:
@@ -129,6 +144,8 @@ def message_handler(message: types.Message):
                          reply_markup=_build_start_keyboard())
         return
 
+    print(datetime.datetime.now(), message.chat.username, message.text)
+    print(message.chat.id)
     responses_photo = [task for task in tasks
                        if task.task_type == TaskType.PHOTO]
     responses_text = [task for task in tasks
@@ -138,6 +155,23 @@ def message_handler(message: types.Message):
     if responses_text:
         handle_text_responses(message, responses_text)
 
+    if not responses_photo and not responses_text:
+        print('No tasks found')
+        bot.send_message(message.chat.id, 'Не смог обработать твой запрос :(')
+
+
+def clear_old_updates():
+    updates = bot.get_updates()
+    if len(updates) > 0:
+        last_update = updates[-1]
+        bot.get_updates(offset=last_update.update_id + 1)
+
 
 if __name__ == '__main__':
-    bot.polling()
+    clear_old_updates()
+    while True:
+        try:
+            bot.polling(non_stop=True, timeout=100)
+        except Exception as e:
+            bot.send_message(635201622, f'Бот упал с ошибкой: {e}')
+            time.sleep(5)
