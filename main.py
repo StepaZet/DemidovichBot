@@ -10,6 +10,7 @@ from task import TaskType, Task
 from provider import ProviderError
 from file_manager import FileManager
 from sqlite_wrapper import add_task
+from opyoid import Injector, ClassBinding, InstanceBinding
 
 TOKEN = '5584161509:AAFwAx4FNR_hSJNArQulRQ1alba-CjjLszA'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
@@ -168,6 +169,7 @@ def clear_old_updates():
 
 
 if __name__ == '__main__':
+    injector = Injector(bindings=[])
     clear_old_updates()
     while True:
         try:
