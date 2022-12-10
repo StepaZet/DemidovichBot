@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 
 import telebot
@@ -11,7 +12,8 @@ from provider import ProviderError
 from file_manager import FileManager
 from sqlite_wrapper import add_task
 
-TOKEN = '5584161509:AAFwAx4FNR_hSJNArQulRQ1alba-CjjLszA'
+TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
+assert TOKEN is not None, 'Токен не найден'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 provider: Provider = Provider()
 provider.event += add_task
