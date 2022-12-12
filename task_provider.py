@@ -6,6 +6,10 @@ from task import Task, TaskType
 
 
 class TaskProvider:
+    button_name = None
+    button_message = None
+    subject_type = None
+
     def __init__(self, subject_type: SubjectType):
         self.__db = Database(str(subject_type.value))
 
@@ -39,6 +43,11 @@ class TaskProvider:
 
 
 class DemidovichProvider(TaskProvider):
+    button_name = 'Демидович'
+    button_message = 'Выбран Демидович\n' \
+                     'Напиши номер(а) задачи(задачек)'
+    subject_type = SubjectType.DEMIDOVICH
+
     def __init__(self):
         super().__init__(SubjectType.DEMIDOVICH)
 
@@ -59,6 +68,11 @@ class DemidovichProvider(TaskProvider):
 
 
 class ProbabilitiesProvider(TaskProvider):
+    button_name = 'Тервер (ФИИТ)'
+    button_message = 'Выбран Тервер (ФИИТ)\n' \
+                     'Напиши номер(а) практики(практик)'
+    subject_type = SubjectType.PROBABILITIES
+
     def __init__(self):
         super().__init__(SubjectType.PROBABILITIES)
 

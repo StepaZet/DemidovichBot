@@ -3,9 +3,11 @@ import os
 import time
 
 import telebot
+from functools import lru_cache
 
 from telebot import types
 from provider import Provider
+from task_provider import TaskProvider
 from subject_type import SubjectType
 from task import TaskType, Task
 from provider import ProviderError
@@ -19,21 +21,49 @@ provider: Provider = Provider()
 provider.event += add_task
 
 
+@lru_cache()
+def _get_tasks_providers_classes() -> list[type[TaskProvider]]:
+    # TODO: Убрать этот метод в Provider
+    return [_provider for _provider in TaskProvider.__subclasses__()]
+
+
+@lru_cache()
 def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    keyboard.add(types.KeyboardButton('Демидович'))
-    keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
+    for _provider in _get_tasks_providers_classes():
+        keyboard.add(types.KeyboardButton(_provider.button_name))
     keyboard.add(types.KeyboardButton('/help'))
     return keyboard
 
 
+@lru_cache()
 def _build_book_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    keyboard.add(types.KeyboardButton('Демидович'))
-    keyboard.add(types.KeyboardButton('Тервер (ФИИТ)'))
+    for _provider in _get_tasks_providers_classes():
+        keyboard.add(types.KeyboardButton(_provider.button_name))
     keyboard.add(types.KeyboardButton('❤️'))
     keyboard.add(types.KeyboardButton('/help'))
     return keyboard
+
+
+@lru_cache()
+def _get_button_request_handlers() -> dict[str, callable]:
+    button_requests = {
+        '❤️': ('Спасибо за лайк!❤️🥰', lambda chat_id: None),
+    }
+
+    # Боремся с замыканием _provider.subject_type
+    def set_user_mode(mode: SubjectType):
+        def _set_user_mode(chat_id: int):
+            provider.set_user_mode(str(chat_id), mode)
+        return _set_user_mode
+
+    for _provider in _get_tasks_providers_classes():
+        button_requests[_provider.button_name] = (
+            _provider.button_message,
+            set_user_mode(_provider.subject_type))
+
+    return button_requests
 
 
 @bot.message_handler(commands=['start'])
@@ -68,27 +98,13 @@ def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
 
 
 def try_handle_button_request(message: types.Message) -> bool:
-    button_requests = {
-        'Демидович':
-            ('Выбран Демидович\n'
-             'Напиши номер(а) задачи(задачек)',
-             lambda: provider.set_user_mode(str(message.chat.id),
-                                            SubjectType.DEMIDOVICH)),
-        'Тервер (ФИИТ)':
-            ('Выбран Тервер (ФИИТ)\n'
-             'Напиши номер(а) практики(практик)',
-             lambda: provider.set_user_mode(str(message.chat.id),
-                                            SubjectType.PROBABILITIES)),
-        '❤️':
-            ('Спасибо за лайк!❤️🥰',
-             lambda: None),
-    }
+    button_requests = _get_button_request_handlers()
 
     if message.text in button_requests:
         text, _function = button_requests[message.text]
         bot.send_message(message.chat.id, text,
                          reply_markup=_build_book_keyboard())
-        _function()
+        _function(message.chat.id)
         return True
     return False
 
@@ -117,7 +133,8 @@ def handle_photo_responses(message: types.Message, tasks: list[Task]):
             try:
                 bot.send_media_group(message.chat.id, medias)
             except Exception as e:
-                bot.send_message(message.chat.id, 'Один из файлов в базе поврежден')
+                bot.send_message(message.chat.id,
+                                 'Один из файлов в базе поврежден')
 
 
 def handle_text_responses(message: types.Message, tasks: list[Task]):
@@ -137,6 +154,7 @@ def handle_text_responses(message: types.Message, tasks: list[Task]):
 
 @bot.message_handler(content_types=['text'])
 def message_handler(message: types.Message):
+    print(datetime.datetime.now(), message.chat.username, message.text)
     if try_handle_button_request(message):
         return
 
@@ -146,8 +164,6 @@ def message_handler(message: types.Message):
                          reply_markup=_build_start_keyboard())
         return
 
-    print(datetime.datetime.now(), message.chat.username, message.text)
-    print(message.chat.id)
     responses_photo = [task for task in tasks
                        if task.task_type == TaskType.PHOTO]
     responses_text = [task for task in tasks
@@ -170,6 +186,8 @@ def clear_old_updates():
 
 
 if __name__ == '__main__':
+    # Заполняем кэш долгого метода
+    _get_tasks_providers_classes()
     clear_old_updates()
     while True:
         try:
