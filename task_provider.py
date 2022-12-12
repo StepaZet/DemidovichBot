@@ -7,7 +7,7 @@ from task import Task, TaskType
 
 class TaskProvider:
     def __init__(self, subject_type: SubjectType):
-        self.__db = Database(str(subject_type.value))
+        self._db = Database(str(subject_type.value))
 
     def get_tasks(self, query: str) -> list[Task]:
         numbers = sorted(list(set(_get_task_numbers_from_query(query))))
@@ -26,7 +26,7 @@ class TaskProvider:
     def _create_task_by_number(self, number: str, task_creator,
                                create_unknown_task, message: str = "") -> Task:
         try:
-            return task_creator(self.__db.get_by_key(number), message)
+            return task_creator(self._db.get_by_key(number), message)
         except KeyError:
             return create_unknown_task(number)
 
