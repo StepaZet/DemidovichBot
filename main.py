@@ -60,7 +60,7 @@ def stat_message(message):
     bot.send_message(message.chat.id, stat_text)
 
 
-def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
+def try_get_tasks(chat_id: int, message: str):
     try:
         return provider.get_tasks(str(chat_id), message)
     except ProviderError as e:
