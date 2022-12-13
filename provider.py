@@ -3,6 +3,7 @@ from database import Database
 from task import Task
 from event import Event
 from stat_handler import Statistics
+from stat_repo import StatRepo
 from task_provider import (
     TaskProvider,
     DemidovichProvider,
@@ -40,7 +41,7 @@ class Provider:
     @staticmethod
     def get_statistic() -> str:
         res = (
-            Statistics()
+            StatRepo()
             .get_unique_users_today()
             .get_unique_users_last_week()
             .get_unique_users_anytime()
