@@ -7,13 +7,22 @@ def add_task(user_id: str, query: str, res: str, mode: str) -> None:
 
 
 class SQLiteWrapper:
-    def __init__(self, db_name, table_name):
+    # def __init__(self, db_name, table_name):
+    #     self.__name = table_name
+    #     self.__db_name = db_name
+    #     self.__sqlite_connection = sqlite3.connect(self.__db_name)
+    #     self.__cursor = self.__sqlite_connection.cursor()
+    #     self.__cursor.execute(
+    #         f'CREATE TABLE IF NOT EXISTS {self.__name} (user_id TEXT, date datetime, mode TEXT, query TEXT, answer TEXT);')
+
+    def __init__(self, db_name, table_name, **kwargs):
         self.__name = table_name
         self.__db_name = db_name
         self.__sqlite_connection = sqlite3.connect(self.__db_name)
         self.__cursor = self.__sqlite_connection.cursor()
+        properties_types = ', '.join([f'{key} {value}' for key, value in kwargs.items()])
         self.__cursor.execute(
-            f'CREATE TABLE IF NOT EXISTS {self.__name} (user_id TEXT, date datetime, mode TEXT, query TEXT, answer TEXT);')
+            f'CREATE TABLE IF NOT EXISTS {self.__name} ({properties_types});')
 
     def add_note_to_db(self, user_id: str, query: str, answer: str, mode: str) -> None:
         self.__cursor.execute(f'INSERT INTO {self.__name} VALUES (?,datetime("now"),?,?,?);',
@@ -55,3 +64,20 @@ class SQLiteWrapper:
     def clear_db(self) -> None:
         self.__cursor.execute(f'DELETE FROM {self.__name};')
         self.__sqlite_connection.commit()
+
+    def add_values_by_dict(self, values: dict) -> None:
+        properties = ', '.join(values.keys())
+        placeholders = ', '.join('?' * len(values))
+        sql_query = f'INSERT INTO {self.__name} ({properties}) VALUES ({placeholders})'
+        self.__cursor.execute(sql_query, list(values.values()))
+        self.__sqlite_connection.commit()
+
+    def get_unique_notes_by_stat(self, main_stat, unique_param=None, *additional_stats) -> int:
+        count_filter = f'DISTINCT {unique_param}' if unique_param is not None else '*'
+        sql = f'SELECT COUNT({count_filter}) FROM {self.__name} WHERE {main_stat}'
+        if additional_stats:
+            for stat in additional_stats:
+                sql += f' AND {stat}'
+        self.__cursor.execute(sql)
+        return self.__cursor.fetchone()[0]
+
