@@ -35,7 +35,12 @@ class Provider:
             raise ProviderError("User has not a mode to get task") from e
         res = self.subjects[SubjectType(mode)].get_tasks(query)
         res_data = [task.data for task in res]
-        self.event(user_id, query, str(res_data), mode)
+        self.event(
+            user_id=user_id,
+            query=query,
+            result=str(res_data),
+            mode=mode
+        )
         return res
 
     @staticmethod

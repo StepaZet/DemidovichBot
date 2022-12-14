@@ -10,13 +10,15 @@ from subject_type import SubjectType
 from task import TaskType, Task
 from provider import ProviderError
 from file_manager import FileManager
+from functools import partial
 from sqlite_wrapper import add_task
+from stat_repo import StatRepo
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 assert TOKEN is not None, 'Токен не найден'
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 provider: Provider = Provider()
-provider.event += add_task
+provider.event += partial(add_task, StatRepo())
 
 
 def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
@@ -175,5 +177,6 @@ if __name__ == '__main__':
         try:
             bot.polling(non_stop=True, timeout=100)
         except Exception as e:
+            raise
             bot.send_message(635201622, f'Бот упал с ошибкой: {e}')
             time.sleep(5)

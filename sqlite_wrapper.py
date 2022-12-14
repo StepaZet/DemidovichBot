@@ -1,9 +1,8 @@
 import sqlite3
 
 
-def add_task(user_id: str, query: str, res: str, mode: str) -> None:
-    sqlite_db = SQLiteWrapper('sqlite.db', 'stats')
-    sqlite_db.add_note_to_db(user_id, query, res, mode)
+def add_task(repo, **kwargs) -> None:
+    repo.add_note_to_db(**kwargs)
 
 
 class SQLiteWrapper:

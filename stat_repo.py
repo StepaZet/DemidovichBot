@@ -1,6 +1,6 @@
 import datetime
 
-from peewee import *
+from peewee import * # noqa
 from BaseModel import BaseModel
 
 
@@ -15,21 +15,20 @@ class Stat(BaseModel):
         table_name = 'stats'
 
 
-
-class IStatMaker:
-    def isTrigger(self, str):
-        pass
-
-    def makeStat(self, str):
-        pass
-
-
-
-stats: IStatMaker = []
-
-for stat in stats:
-    if (stat.isTrigger("")):
-        stat.makeStat("")
+# class IStatMaker:
+#     def isTrigger(self, str):
+#         pass
+#
+#     def makeStat(self, str):
+#         pass
+#
+#
+#
+# stats: IStatMaker = []
+#
+# for stat in stats:
+#     if (stat.isTrigger("")):
+#         stat.makeStat("")
 
 class StatRepo:
     def __init__(self):
@@ -65,13 +64,13 @@ class StatRepo:
     def get_unique_users_last_week(self):
         return self.get_unique_users_by_days(7)
 
-    def add_note_to_db(self, user_id: str, query: str, answer: str,
-                       mode: str) -> None:
+    def add_note_to_db(self, **kwargs) -> None:
         self._db.create(
-            user_id=user_id,
-            query=query,
-            answer=answer,
-            mode=mode
+            # user_id=user_id,
+            # query=query,
+            # answer=answer,
+            # mode=mode
+            **kwargs
         )
 
     def __str__(self):
