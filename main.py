@@ -3,40 +3,39 @@ import time
 import os
 
 import telebot
-from functools import lru_cache
+from functools import lru_cache, partial
 
 from telebot import types
 
 from database import Database
-from provider import Provider
-from task_provider import TaskProvider
+from task_provider import TaskProvider, get_providers
 from subject_type import SubjectType
+from provider import get_statistic
 from task import TaskType, Task
 from file_manager import FileManager
-from sqlite_wrapper import add_task
-
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
-assert (
-        TOKEN is not None
-), 'Токен не найден'
+
+assert TOKEN is not None, 'Токен не найден'
+
+ADMINS = [
+    635201622,
+    453148886,
+    413639483
+]
 
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 db = Database("Users")
-provider: Provider = Provider()
-provider.event += add_task
 
 
-@lru_cache()
-def _get_tasks_providers_classes() -> list[type[TaskProvider]]:
-    # TODO: Убрать этот метод в Provider
-    return [_provider for _provider in TaskProvider.__subclasses__()]
+def set_user_mode(user_id: int, mode: SubjectType):
+    db.set(str(user_id), mode.value)
 
 
 @lru_cache()
 def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    for _provider in _get_tasks_providers_classes():
+    for _provider in get_providers():
         keyboard.add(types.KeyboardButton(_provider.button_name))
     keyboard.add(types.KeyboardButton('/help'))
     return keyboard
@@ -45,7 +44,7 @@ def _build_start_keyboard() -> types.ReplyKeyboardMarkup:
 @lru_cache()
 def _build_book_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    for _provider in _get_tasks_providers_classes():
+    for _provider in get_providers():
         keyboard.add(types.KeyboardButton(_provider.button_name))
     keyboard.add(types.KeyboardButton('❤️'))
     keyboard.add(types.KeyboardButton('/help'))
@@ -58,16 +57,11 @@ def _get_button_request_handlers() -> dict[str, callable]:
         '❤️': ('Спасибо за лайк!❤️🥰', lambda chat_id: None),
     }
 
-    # Боремся с замыканием _provider.subject_type
-    def set_user_mode(mode: SubjectType):
-        def _set_user_mode(chat_id: int):
-            provider.set_user_mode(str(chat_id), mode)
-        return _set_user_mode
-
-    for _provider in _get_tasks_providers_classes():
+    for _provider in get_providers():
         button_requests[_provider.button_name] = (
             _provider.button_message,
-            set_user_mode(_provider.subject_type))
+            partial(set_user_mode, mode=_provider.subject_type)
+        )
 
     return button_requests
 
@@ -81,25 +75,28 @@ def start_message(message):
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    help_text = 'Для начала работы выбери нужный тебе задачник.\n' \
-                'После этого напиши номер задачи, которую хочешь найти. Например, 10.1 или 42\n\n' \
-                'Если хочешь найти несколько задач, то напиши их через пробел, запятую или дефис.\n' \
-                'Например: 1, 2, 3 или 1-3 или 1 2 3\n\n' \
-                'Если будут любые проблемы, пиши авторам: ' \
-                '@therealnowhereman, @Demotivator_Stepan, @not_amigo Удачи!) 🥰'
+    help_text = (
+        'Для начала работы выбери нужный тебе задачник.\n'
+        'После этого напиши номер задачи, которую хочешь найти. Например, 10.1 или 42\n\n'  # noqa: E501
+        'Если хочешь найти несколько задач, то напиши их через пробел, запятую или дефис.\n'  # noqa: E501
+        'Например: 1, 2, 3 или 1-3 или 1 2 3\n\n'
+        'Если будут любые проблемы, пиши авторам: '
+        '@therealnowhereman, @Demotivator_Stepan, @not_amigo Удачи!) 🥰'
+    )
     bot.send_message(message.chat.id, help_text)
 
 
 @bot.message_handler(commands=['stats'])
 def stat_message(message):
-    stat_text = Provider.get_statistic()
+    stat_text = get_statistic()
     bot.send_message(message.chat.id, stat_text)
 
 
 def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:
     try:
-        mode = db.get_by_key(str(chat_id))
-        return provider.get_tasks(SubjectType(mode), message)
+        mode = SubjectType(db.get_by_key(str(chat_id)))
+        provider = TaskProvider.get_provider_by_subject_type(mode)
+        return provider.get_tasks(message)
     except KeyError as e:
         return None
 
@@ -193,11 +190,15 @@ def clear_old_updates():
 
 if __name__ == '__main__':
     # Заполняем кэш долгого метода
-    _get_tasks_providers_classes()
+    get_providers()
     clear_old_updates()
     while True:
+        for admin in ADMINS:
+            bot.send_message(admin, 'Я живой!')
+
         try:
             bot.polling(non_stop=True, timeout=100)
         except Exception as e:
-            bot.send_message(635201622, f'Бот упал с ошибкой: {e}')
+            for admin in ADMINS:
+                bot.send_message(admin, f'Я упал с ошибкой: {e}')
             time.sleep(5)
