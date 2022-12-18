@@ -1,6 +1,6 @@
 import datetime
 
-from peewee import *
+from peewee import * # noqa
 from BaseModel import BaseModel
 
 
@@ -15,27 +15,47 @@ class Stat(BaseModel):
         table_name = 'stats'
 
 
+# class IStatMaker:
+#     def isTrigger(self, str):
+#         pass
+#
+#     def makeStat(self, str):
+#         pass
+#
+#
+#
+# stats: IStatMaker = []
+#
+# for stat in stats:
+#     if (stat.isTrigger("")):
+#         stat.makeStat("")
+
 class StatRepo:
     def __init__(self):
-        self.__db = Stat
-        self.__result = ['Статистика:']
+        self._db = Stat
+        self._result = ['Статистика:']
 
     def get_unique_users_by_days(self, days_count: int = 1):
         now = datetime.datetime.now()
         last_date = now - datetime.timedelta(days=days_count)
-        query = (self.__db
-                 .select(fn.Count(fn.Distinct(self.__db.user_id)))
-                 .where(
-            (self.__db.date.day <= now.day) | (self.__db.date.day >= last_date.day))
-                 .scalar())
-        self.__result.append(f'За {days_count} дней: {query} уникальных пользователей')
+        query = (
+            self._db
+            .select(fn.Count(fn.Distinct(self._db.user_id)))
+            .where(self._db.date.day <= now.day
+                   | self._db.date.day >= last_date.day)
+            .scalar()
+        )
+        self._result.append(
+            f'За {days_count} дней: {query} уникальных пользователей')
         return self
 
     def get_unique_users_anytime(self):
-        query = (self.__db
-                 .select(fn.Count(fn.Distinct(self.__db.user_id)))
-                 .scalar())
-        self.__result.append(f'За все время: {query} уникальных пользователей')
+        query = (
+            self._db
+            .select(fn.Count(fn.Distinct(self._db.user_id)))
+            .scalar()
+        )
+        self._result.append(f'За все время: {query} уникальных пользователей')
         return self
 
     def get_unique_users_today(self):
@@ -44,8 +64,14 @@ class StatRepo:
     def get_unique_users_last_week(self):
         return self.get_unique_users_by_days(7)
 
-    def add_note_to_db(self, user_id: str, query: str, answer: str, mode: str) -> None:
-        self.__db.create(user_id=user_id, query=query, answer=answer, mode=mode)
+    def add_note_to_db(self, **kwargs) -> None:
+        self._db.create(
+            # user_id=user_id,
+            # query=query,
+            # answer=answer,
+            # mode=mode
+            **kwargs
+        )
 
     def __str__(self):
-        return '\n'.join(self.__result)
+        return '\n'.join(self._result)

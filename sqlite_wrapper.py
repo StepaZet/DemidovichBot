@@ -1,28 +1,27 @@
 import sqlite3
 
 
-def add_task(user_id: str, query: str, res: str, mode: str) -> None:
-    sqlite_db = SQLiteWrapper('sqlite.db', 'stats')
-    sqlite_db.add_note_to_db(user_id, query, res, mode)
+def add_task(repo, **kwargs) -> None:
+    repo.add_note_to_db(**kwargs)
 
 
 class SQLiteWrapper:
-    # def __init__(self, db_name, table_name):
-    #     self.__name = table_name
-    #     self.__db_name = db_name
-    #     self.__sqlite_connection = sqlite3.connect(self.__db_name)
-    #     self.__cursor = self.__sqlite_connection.cursor()
-    #     self.__cursor.execute(
-    #         f'CREATE TABLE IF NOT EXISTS {self.__name} (user_id TEXT, date datetime, mode TEXT, query TEXT, answer TEXT);')
-
-    def __init__(self, db_name, table_name, **kwargs):
+    def __init__(self, db_name, table_name):
         self.__name = table_name
         self.__db_name = db_name
         self.__sqlite_connection = sqlite3.connect(self.__db_name)
         self.__cursor = self.__sqlite_connection.cursor()
-        properties_types = ', '.join([f'{key} {value}' for key, value in kwargs.items()])
         self.__cursor.execute(
-            f'CREATE TABLE IF NOT EXISTS {self.__name} ({properties_types});')
+            f'CREATE TABLE IF NOT EXISTS {self.__name} (user_id TEXT, date datetime, mode TEXT, query TEXT, answer TEXT);')
+
+    # def __init__(self, db_name, table_name, **kwargs):
+    #     self.__name = table_name
+    #     self.__db_name = db_name
+    #     self.__sqlite_connection = sqlite3.connect(self.__db_name)
+    #     self.__cursor = self.__sqlite_connection.cursor()
+    #     properties_types = ', '.join([f'{key} {value}' for key, value in kwargs.items()])
+    #     self.__cursor.execute(
+    #         f'CREATE TABLE IF NOT EXISTS {self.__name} ({properties_types});')
 
     def add_note_to_db(self, user_id: str, query: str, answer: str, mode: str) -> None:
         self.__cursor.execute(f'INSERT INTO {self.__name} VALUES (?,datetime("now"),?,?,?);',

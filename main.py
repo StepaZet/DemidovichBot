@@ -1,5 +1,4 @@
 import datetime
-import time
 import os
 
 import telebot
@@ -13,6 +12,8 @@ from subject_type import SubjectType
 from provider import get_statistic
 from task import TaskType, Task
 from file_manager import FileManager
+from functools import partial
+from stat_repo import StatRepo
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 
@@ -30,6 +31,9 @@ db = Database("Users")
 
 def set_user_mode(user_id: int, mode: SubjectType):
     db.set(str(user_id), mode.value)
+
+# TODO: provider.event += partial(add_task, StatRepo())
+
 
 
 @lru_cache()
