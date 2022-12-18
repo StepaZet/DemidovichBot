@@ -8,3 +8,7 @@ exclude =
     dist
     venv
     .venv
+
+ignore =
+    F405
+    W503
