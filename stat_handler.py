@@ -1,4 +1,4 @@
-from sqlite_wrapper import SQLiteDB
+from sqlite_wrapper import SQLiteWrapper
 
 
 def chained(fn):
@@ -11,7 +11,7 @@ def chained(fn):
 class Statistics:
     def __init__(self):
         self._stats = ['Статистика:']
-        self.sqlite_db = SQLiteDB()
+        self.sqlite_db = SQLiteWrapper()
 
     @chained
     def get_unique_users_today(self):
