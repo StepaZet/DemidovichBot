@@ -1,7 +1,14 @@
 import unittest
 
 from task import Task, TaskType
-from test_provider import assert_single_task_equals
+
+
+def assert_single_task_equals(tasks: list[Task],
+                              data: str,
+                              task_type: TaskType):
+    assert len(tasks) == 1
+    assert tasks[0].data == data
+    assert tasks[0].task_type == task_type
 
 
 def test_get_existing_demidovich_task(dem_provider):

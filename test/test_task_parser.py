@@ -29,9 +29,10 @@ def test_finds_range():
 
 def test_returns_only_first_10_numbers():
     text = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
-    assert _get_task_numbers_from_query(text) == ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    expected = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    assert _get_task_numbers_from_query(text) == expected
     text = "1-15"
-    assert _get_task_numbers_from_query(text) == ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    assert _get_task_numbers_from_query(text) == expected
 
 
 if __name__ == '__main__':
