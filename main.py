@@ -1,7 +1,8 @@
 import datetime
 import os
-
 import telebot
+import time
+
 from functools import lru_cache, partial
 from telebot import types
 from database import Database
@@ -100,7 +101,7 @@ def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:
         answer = provider.get_tasks(message)
         event(chat_id, message, answer, mode)
         return answer
-    except KeyError as e:
+    except KeyError:
         return None
 
 
@@ -124,7 +125,7 @@ def handle_photo_responses(message: types.Message, tasks: list[Task]):
         with open(tasks[0].data, 'rb') as photo:
             try:
                 bot.send_photo(message.chat.id, photo, caption=tasks[0].text)
-            except Exception as e:
+            except Exception:
                 bot.send_message(message.chat.id, 'Файл в базе поврежден')
     elif len(tasks) > 1:
         file_names = [task.data for task in tasks]
@@ -139,7 +140,7 @@ def handle_photo_responses(message: types.Message, tasks: list[Task]):
             medias[0].caption = capture
             try:
                 bot.send_media_group(message.chat.id, medias)
-            except Exception as e:
+            except Exception:
                 bot.send_message(message.chat.id,
                                  'Один из файлов в базе поврежден')
 
