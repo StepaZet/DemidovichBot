@@ -6,11 +6,12 @@ import telebot
 from functools import lru_cache
 
 from telebot import types
+
+from database import Database
 from provider import Provider
 from task_provider import TaskProvider
 from subject_type import SubjectType
 from task import TaskType, Task
-from provider import ProviderError
 from file_manager import FileManager
 from sqlite_wrapper import add_task
 
@@ -21,6 +22,7 @@ assert (
 ), 'Токен не найден'
 
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
+db = Database("Users")
 provider: Provider = Provider()
 provider.event += add_task
 
@@ -96,9 +98,11 @@ def stat_message(message):
 
 def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
     try:
-        return provider.get_tasks(str(chat_id), message)
-    except ProviderError as e:
+        mode = db.get_by_key(str(chat_id))
+    except KeyError as e:
         return 'Ты не выбрал режим'
+
+    return provider.get_tasks(SubjectType(mode), message)
 
 
 def try_handle_button_request(message: types.Message) -> bool:
