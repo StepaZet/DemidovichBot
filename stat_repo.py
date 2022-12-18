@@ -30,6 +30,11 @@ class Stat(BaseModel):
 #     if (stat.isTrigger("")):
 #         stat.makeStat("")
 
+def add_stat(**kwargs):
+    repo = StatRepo()
+    repo.add_note_to_db(**kwargs)
+
+
 class StatRepo:
     def __init__(self):
         self._db = Stat
@@ -65,13 +70,12 @@ class StatRepo:
         return self.get_unique_users_by_days(7)
 
     def add_note_to_db(self, **kwargs) -> None:
-        self._db.create(
-            # user_id=user_id,
-            # query=query,
-            # answer=answer,
-            # mode=mode
-            **kwargs
-        )
+        self._db.create(**kwargs)
 
-    def __str__(self):
-        return '\n'.join(self._result)
+    def clear_db(self):
+        self._db.delete().execute()
+
+    def build(self):
+        result = self._result
+        self._result = ['Статистика:']
+        return '\n'.join(result)

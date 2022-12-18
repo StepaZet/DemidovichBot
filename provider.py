@@ -7,5 +7,6 @@ def get_statistic() -> str:
         .get_unique_users_today()
         .get_unique_users_last_week()
         .get_unique_users_anytime()
+        .build()
     )
-    return str(res)
+    return res

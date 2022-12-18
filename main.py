@@ -11,7 +11,7 @@ from subject_type import SubjectType
 from provider import get_statistic
 from task import TaskType, Task
 from file_manager import FileManager
-from stat_repo import StatRepo
+from stat_repo import StatRepo, add_stat
 from event import Event
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
@@ -99,7 +99,7 @@ def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:
         mode = SubjectType(db.get_by_key(str(chat_id)))
         provider = TaskProvider.get_provider_by_subject_type(mode)
         answer = provider.get_tasks(message)
-        event(chat_id, message, answer, mode)
+        event(chat_id=chat_id, message=message, answer=answer, mode=mode)
         return answer
     except KeyError:
         return None
