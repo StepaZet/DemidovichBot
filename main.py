@@ -6,11 +6,12 @@ import telebot
 from functools import lru_cache
 
 from telebot import types
+
+from database import Database
 from provider import Provider
 from task_provider import TaskProvider
 from subject_type import SubjectType
 from task import TaskType, Task
-from provider import ProviderError
 from file_manager import FileManager
 from sqlite_wrapper import add_task
 
@@ -21,6 +22,7 @@ assert (
 ), 'Токен не найден'
 
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
+db = Database("Users")
 provider: Provider = Provider()
 provider.event += add_task
 
@@ -94,11 +96,12 @@ def stat_message(message):
     bot.send_message(message.chat.id, stat_text)
 
 
-def try_get_tasks(chat_id: int, message: str) -> list[Task] | str:
+def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:
     try:
-        return provider.get_tasks(str(chat_id), message)
-    except ProviderError as e:
-        return 'Ты не выбрал режим'
+        mode = db.get_by_key(str(chat_id))
+        return provider.get_tasks(SubjectType(mode), message)
+    except KeyError as e:
+        return None
 
 
 def try_handle_button_request(message: types.Message) -> bool:
@@ -162,9 +165,8 @@ def message_handler(message: types.Message):
     if try_handle_button_request(message):
         return
 
-    tasks = try_get_tasks(message.chat.id, message.text)
-    if isinstance(tasks, str):
-        bot.send_message(message.chat.id, tasks,
+    if not (tasks := try_get_tasks(message.chat.id, message.text)):
+        bot.send_message(message.chat.id, "Ты не выбрал задачник",
                          reply_markup=_build_start_keyboard())
         return
 
