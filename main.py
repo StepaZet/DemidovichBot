@@ -3,17 +3,15 @@ import os
 
 import telebot
 from functools import lru_cache, partial
-
 from telebot import types
-
 from database import Database
 from task_provider import TaskProvider, get_providers
 from subject_type import SubjectType
 from provider import get_statistic
 from task import TaskType, Task
 from file_manager import FileManager
-from functools import partial
 from stat_repo import StatRepo
+from event import Event
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 
@@ -27,13 +25,12 @@ ADMINS = [
 
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 db = Database("Users")
+event = Event()
+event += partial(add_task, StatRepo())
 
 
 def set_user_mode(user_id: int, mode: SubjectType):
     db.set(str(user_id), mode.value)
-
-# TODO: provider.event += partial(add_task, StatRepo())
-
 
 
 @lru_cache()
@@ -100,7 +97,9 @@ def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:
     try:
         mode = SubjectType(db.get_by_key(str(chat_id)))
         provider = TaskProvider.get_provider_by_subject_type(mode)
-        return provider.get_tasks(message)
+        answer = provider.get_tasks(message)
+        event(chat_id, message, answer, mode)
+        return answer
     except KeyError as e:
         return None
 
