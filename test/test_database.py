@@ -1,21 +1,43 @@
-import unittest
-import pickledb
+import pytest
+import os
+
+from database import Database
 
 
-class TestDB(unittest.TestCase):
-    def setUp(self):
-        self.test_db = pickledb.load('test.db', False)
-        self.test_db.dcreate('test_dict')
-        self.test_db.dump()
+@pytest.fixture(scope='function')
+def test_db():
+    if not os.path.exists('database.db'):
+        with open('database.db', 'w') as f:
+            f.write('{}')
 
-    def test_get_non_existent_dict(self):
-        with self.assertRaises(KeyError):
-            self.test_db.dgetall('non_existent_dict')
+    db = Database('test')
+    db.set('test', 'test')
+    yield db
+    os.remove('database.db')
 
-    def test_get_non_existent_key(self):
-        with self.assertRaises(KeyError):
-            self.test_db.dget('test_dict', 'non_existent_key')
 
-    def test_get_existed_db(self):
-        test_dict = pickledb.load('test_dict', False)
-        self.assertIsNotNone(test_dict)
+def test_get_by_key(test_db):
+    assert test_db.get_by_key('test') == 'test'
+
+
+def test_get_all(test_db):
+    test_db.set('test2', 'test2')
+    assert test_db.get_all() == {'test': 'test', 'test2': 'test2'}
+
+
+def test_set(test_db):
+    assert test_db.get_by_key('test') == 'test'
+
+
+def test_get_non_existing_key_raises_key_error(test_db):
+    with pytest.raises(KeyError):
+        test_db.get_by_key('test1')
+
+
+def test_set_existing_key_updates_value(test_db):
+    test_db.set('test', 'test1')
+    assert test_db.get_by_key('test') == 'test1'
+
+
+if __name__ == '__main__':
+    pytest.main()

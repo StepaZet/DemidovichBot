@@ -16,25 +16,25 @@ class Database:
         """
         if not os.path.exists('database.db'):
             raise FileNotFoundError('Database file not found')
-        self.__db = pickledb.load('database.db', False)
+        self.name = table_name
+        self._db = pickledb.load('database.db', False)
         self._create_if_not_exists(table_name)
-        self.__table_name = table_name
 
     def get_by_key(self, identifier: str):
-        return self.__db.dget(self.__table_name, identifier)
+        return self._db.dget(self.name, identifier)
 
     def get_all(self) -> list:
-        return self.__db.dgetall(self.__table_name)
+        return self._db.dgetall(self.name)
 
     def set(self, identifier: str, value):
-        if self.__db.dexists(self.__table_name, identifier):
-            self.__db.dpop(self.__table_name, identifier)
-        self.__db.dadd(self.__table_name, (identifier, value))
-        self.__db.dump()
+        if self._db.dexists(self.name, identifier):
+            self._db.dpop(self.name, identifier)
+        self._db.dadd(self.name, (identifier, value))
+        self._db.dump()
 
     def _create_if_not_exists(self, table_name):
         try:
-            self.__db.dgetall(table_name)
+            self._db.dgetall(table_name)
         except KeyError:
-            self.__db.dcreate(table_name)
-            self.__db.dump()
+            self._db.dcreate(table_name)
+            self._db.dump()
