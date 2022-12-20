@@ -12,7 +12,7 @@ from task import TaskType, Task
 from file_manager import FileManager
 from stat_repo import StatRepo, add_stat
 from event import Event
-from StatBuilder import StatBuilder
+from stat_builder import StatBuilder
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 
