@@ -1,5 +1,5 @@
 from IStatMaker import get_stat_makers, IStatMaker
-import stat_repo
+import stat_repo # noqa do not delete need to fix
 
 
 class StatBuilder:
@@ -14,11 +14,7 @@ class StatBuilder:
             result.append(stat_maker.build())
         return result
 
-    def get_required_stat_makers(self, stat_names: list[str]) -> list['IStatMaker']:
+    def get_required_stat_makers(self, stat_names: list[str]) -> list['IStatMaker']: # noqa maybe newline
         for stat_name in stat_names:
             if stat_name in self.stat_dict:
                 yield self.stat_dict[stat_name]
-
-
-# a = StatBuilder()
-# print(a.build(['main']))

@@ -13,4 +13,5 @@ class IStatMaker:
 
 @lru_cache
 def get_stat_makers() -> list[type['IStatMaker']]:
-    return [stat_maker for stat_maker in IStatMaker.__subclasses__()]  # TODO: мб сделать один статический метод по получению сабклассов?
+    return [stat_maker for stat_maker in IStatMaker.__subclasses__()]
+    # TODO: мб сделать один статический метод по получению сабклассов?
