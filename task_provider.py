@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from abc import ABC, abstractmethod
@@ -8,7 +10,7 @@ from task import Task, TaskType
 
 
 @lru_cache()
-def get_providers() -> list[type['TaskProvider']]:
+def get_providers() -> list[type[TaskProvider]]:
     return [provider for provider in TaskProvider.__subclasses__()]
 
 
@@ -21,10 +23,12 @@ class TaskProvider(ABC):
         self._db = Database(str(subject_type.value))
 
     @staticmethod
-    def get_provider_by_subject_type(subject_type: SubjectType):
-        for _provider in TaskProvider.__subclasses__():
+    def get_provider_by_subject_type(
+            subject_type: SubjectType
+    ) -> TaskProvider:
+        for _provider in get_providers():
             if _provider.subject_type == subject_type:
-                return _provider
+                return _provider()
         raise ValueError(f"Provider for {subject_type} not found")
 
     def get_tasks(self, query: str) -> list[Task]:

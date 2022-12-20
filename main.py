@@ -27,7 +27,7 @@ ADMINS = [
 bot: telebot.TeleBot = telebot.TeleBot(TOKEN)
 db = Database("Users")
 event = Event()
-event += partial(add_stat, StatRepo())
+event += add_stat
 
 
 def set_user_mode(user_id: int, mode: SubjectType):

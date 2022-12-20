@@ -17,7 +17,7 @@ class Database:
         if not os.path.exists('database.db'):
             raise FileNotFoundError('Database file not found')
         self.name = table_name
-        self._db = pickledb.load('database.db', False)
+        self._db = pickledb.load('database.db', False, sig=False)
         self._create_if_not_exists(table_name)
 
     def get_by_key(self, identifier: str):
