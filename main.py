@@ -8,13 +8,13 @@ from telebot import types
 from database import Database
 from task_provider import TaskProvider, get_providers
 from subject_type import SubjectType
-from provider import get_statistic
 from task import TaskType, Task
 from file_manager import FileManager
 from stat_repo import StatRepo, add_stat
 from event import Event
+from StatBuilder import StatBuilder
 
-TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
+TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
 
 assert TOKEN is not None, 'Токен не найден'
 
@@ -90,8 +90,12 @@ def help_message(message):
 
 @bot.message_handler(commands=['stats'])
 def stat_message(message):
-    stat_text = get_statistic()
-    bot.send_message(message.chat.id, stat_text)
+    words = message.text.split()[1:]
+    if words is None or len(words) == 0:
+        bot.send_message(message.chat.id, StatRepo().build())
+        return
+    stat_texts = StatBuilder().build(words)
+    bot.send_message(message.chat.id, '\n\n'.join(stat_texts))
 
 
 def try_get_tasks(chat_id: int, message: str) -> list[Task] | None:

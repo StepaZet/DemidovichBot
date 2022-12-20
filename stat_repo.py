@@ -2,6 +2,7 @@ import datetime
 
 from peewee import * # noqa
 from BaseModel import BaseModel
+from IStatMaker import IStatMaker
 
 
 class Stat(BaseModel):
@@ -17,7 +18,7 @@ class Stat(BaseModel):
 
 # class IStatMaker:
 #     def isTrigger(self, str):
-#         pass
+#         self.is_trigger = True
 #
 #     def makeStat(self, str):
 #         pass
@@ -35,10 +36,12 @@ def add_stat(**kwargs):
     repo.add_note_to_db(**kwargs)
 
 
-class StatRepo:
+class StatRepo(IStatMaker):
+    name = 'main'
+
     def __init__(self):
+        super().__init__()
         self._db = Stat
-        self._result = ['Статистика:']
 
     def get_unique_users_by_days(self, days_count: int = 1):
         now = datetime.datetime.now()
@@ -76,6 +79,7 @@ class StatRepo:
         self._db.delete().execute()
 
     def build(self):
+        self.get_unique_users_today().get_unique_users_by_days(7).get_unique_users_anytime()
         result = self._result
-        self._result = ['Статистика:']
+        self.result = ['Средняя cтатистика:']
         return '\n'.join(result)
