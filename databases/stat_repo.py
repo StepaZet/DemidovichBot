@@ -5,7 +5,6 @@ import datetime
 from peewee import * # noqa
 
 from databases.base_model import BaseModel
-from databases.stat_maker_interface import IStatMaker
 
 
 __all__ = ['add_stat', 'StatRepo', 'Stat']
@@ -27,14 +26,13 @@ def add_stat(**kwargs):
     repo.add_note_to_db(**kwargs)
 
 
-class StatRepo(IStatMaker):
-    name = 'main'
+class StatRepo:
 
     def __init__(self):
         super().__init__()
         self._db = Stat
 
-    def get_unique_users_by_days(self, days_count: int = 1) -> StatRepo:
+    def get_unique_users_by_days(self, days_count: int = 1) -> str:
         now = datetime.datetime.now()
         last_date = now - datetime.timedelta(days=days_count)
         query = (
@@ -44,23 +42,20 @@ class StatRepo(IStatMaker):
                    | self._db.date.day >= last_date.day)
             .scalar()
         )
-        self._result.append(
-            f'За {days_count} дней: {query} уникальных пользователей')
-        return self
+        return f'За {days_count} дней: {query} уникальных пользователей'
 
-    def get_unique_users_anytime(self) -> StatRepo:
+    def get_unique_users_anytime(self) -> str:
         query = (
             self._db
             .select(fn.Count(fn.Distinct(self._db.user_id)))
             .scalar()
         )
-        self._result.append(f'За все время: {query} уникальных пользователей')
-        return self
+        return f'За все время: {query} уникальных пользователей'
 
-    def get_unique_users_today(self) -> StatRepo:
+    def get_unique_users_today(self) -> str:
         return self.get_unique_users_by_days(1)
 
-    def get_unique_users_last_week(self) -> StatRepo:
+    def get_unique_users_last_week(self) -> str:
         return self.get_unique_users_by_days(7)
 
     def add_note_to_db(self, **kwargs) -> None:
@@ -69,10 +64,3 @@ class StatRepo(IStatMaker):
     def clear_db(self) -> None:
         self._db.delete().execute()
 
-    def build(self) -> str:
-        (
-            self.get_unique_users_today()
-            .get_unique_users_by_days(7)
-            .get_unique_users_anytime()
-        )
-        return '\n'.join(self._result)
