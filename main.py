@@ -1,4 +1,5 @@
 import datetime
+import os
 import telebot
 import time
 
@@ -13,7 +14,7 @@ from stat_repo import StatRepo, add_stat
 from event import Event
 from StatBuilder import StatBuilder
 
-TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
+TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 
 assert TOKEN is not None, 'Токен не найден'
 
