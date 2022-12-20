@@ -5,14 +5,16 @@ import time
 
 from functools import lru_cache, partial
 from telebot import types
-from database import Database
-from task_provider import TaskProvider, get_providers
-from subject_type import SubjectType
-from task import TaskType, Task
-from file_manager import FileManager
-from stat_repo import StatRepo, add_stat
-from event import Event
-from stat_builder import StatBuilder
+
+from databases.database import Database
+from databases.stat_builder import StatBuilder
+from databases.stat_repo import StatRepo, add_stat
+from providers.task_provider import TaskProvider, get_providers
+from providers.subject_type import SubjectType
+from providers.task import TaskType, Task
+from util.event import Event
+from util.file_manager import FileManager
+
 
 TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 

@@ -1,5 +1,5 @@
 import pytest
-from task_provider import DemidovichProvider, ProbabilitiesProvider
+from providers.task_provider import DemidovichProvider, ProbabilitiesProvider
 from unittest.mock import patch
 
 
@@ -20,11 +20,11 @@ class MockDataBase:
 
 @pytest.fixture(scope="session")
 def dem_provider():
-    with patch('task_provider.Database', MockDataBase):
+    with patch('providers.task_provider.Database', MockDataBase):
         return DemidovichProvider()
 
 
 @pytest.fixture(scope="session")
 def prob_provider():
-    with patch('task_provider.Database', MockDataBase):
+    with patch('providers.task_provider.Database', MockDataBase):
         return ProbabilitiesProvider()

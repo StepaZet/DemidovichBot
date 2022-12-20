@@ -3,10 +3,10 @@ from __future__ import annotations
 import re
 
 from abc import ABC, abstractmethod
-from database import Database
+from databases.database import Database
 from functools import lru_cache
-from subject_type import SubjectType
-from task import Task, TaskType
+from providers.subject_type import SubjectType
+from providers.task import Task, TaskType
 
 
 @lru_cache()

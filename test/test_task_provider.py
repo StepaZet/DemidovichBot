@@ -1,6 +1,6 @@
 import unittest
 
-from task import Task, TaskType
+from providers.task import Task, TaskType
 
 
 def assert_single_task_equals(tasks: list[Task],

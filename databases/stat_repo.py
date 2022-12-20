@@ -3,8 +3,12 @@ from __future__ import annotations
 import datetime
 
 from peewee import * # noqa
-from base_model import BaseModel
-from stat_maker_interface import IStatMaker
+
+from databases.base_model import BaseModel
+from databases.stat_maker_interface import IStatMaker
+
+
+__all__ = ['add_stat', 'StatRepo', 'Stat']
 
 
 class Stat(BaseModel):

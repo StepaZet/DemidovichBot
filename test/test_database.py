@@ -1,7 +1,8 @@
 import pytest
 import os
 
-from database import Database
+from databases.database import Database
+from databases.stat_repo import *  # noqa
 
 
 @pytest.fixture(scope='function')

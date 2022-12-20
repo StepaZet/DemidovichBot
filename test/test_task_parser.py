@@ -1,5 +1,5 @@
 import unittest
-from task_provider import _get_task_numbers_from_query
+from providers.task_provider import _get_task_numbers_from_query
 
 
 def test_finds_single_number():

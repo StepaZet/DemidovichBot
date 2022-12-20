@@ -1,5 +1,4 @@
-from stat_maker_interface import get_stat_makers, IStatMaker
-import stat_repo # noqa do not delete need to fix
+from databases.stat_maker_interface import get_stat_makers, IStatMaker
 
 
 class StatBuilder:
