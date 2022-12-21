@@ -63,4 +63,3 @@ class StatRepo:
 
     def clear_db(self) -> None:
         self._db.delete().execute()
-

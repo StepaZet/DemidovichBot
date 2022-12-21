@@ -17,7 +17,7 @@ from util.file_manager import FileManager
 from databases.stat_uniq import UniqueStat
 
 
-TOKEN = '5487430726:AAGd7xMlvZaYOJ3wTP4JVokW16NWy4oD31Q'
+TOKEN = os.getenv('DEMIDOVICH_BOT_TOKEN')
 
 assert TOKEN is not None, 'Токен не найден'
 
@@ -94,8 +94,9 @@ def help_message(message):
 @bot.message_handler(commands=['stats'])
 def stat_message(message):
     words = message.text.split()[1:]
-    if words is None or len(words) == 0:
-        bot.send_message(message.chat.id, UniqueStat().build())
+    if not words:
+        ans = UniqueStat().build()
+        bot.send_message(message.chat.id, ans)
         return
     stat_texts = StatBuilder().build(words)
     bot.send_message(message.chat.id, '\n\n'.join(stat_texts))

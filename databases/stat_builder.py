@@ -11,6 +11,8 @@ class StatBuilder:
         result = []
         for stat_maker in self.get_required_stat_makers(stat_names):
             result.append(stat_maker.build())
+        if not result and stat_names:
+            return ['Такой статистики нет']
         return result
 
     def get_required_stat_makers(
