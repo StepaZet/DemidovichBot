@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from providers.task import Task, TaskType
 
@@ -16,12 +16,12 @@ def test_get_existing_demidovich_task(dem_provider):
     assert_single_task_equals(task, "1.jpg", TaskType.PHOTO)
 
 
-def test_get_non_existing_demidovich_task(dem_provider):
+def test_get_non_existing_demidovich_returns_text(dem_provider):
     task = dem_provider.get_tasks('2')
     assert_single_task_equals(task, "Задача не найдена 🤥", TaskType.TEXT)
 
 
-def test_get_demidovich_dot_subtask(dem_provider):
+def test_get_demidovich_dot_subtask_returns_no_dot(dem_provider):
     task = dem_provider.get_tasks('1.1')
     assert_single_task_equals(task, "1.jpg", TaskType.PHOTO)
 
@@ -35,4 +35,4 @@ def test_probabilities_provider(prob_provider):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()

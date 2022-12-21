@@ -1,4 +1,4 @@
-import unittest
+import pytest
 from providers.task_provider import _get_task_numbers_from_query
 
 
@@ -36,4 +36,4 @@ def test_returns_only_first_10_numbers():
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
